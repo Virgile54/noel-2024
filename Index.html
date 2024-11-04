@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste de Noël - Jamie, Eden et Nathanaël</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body class="bg-red-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-4xl font-bold text-center text-red-600 mb-8">
+            Liste de Noël 🎄
+        </h1>
+
+        <div class="flex flex-wrap gap-2 mb-8" id="childTabs">
+            <button class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg active" onclick="showChild('Jamie')">Jamie</button>
+            <button class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg" onclick="showChild('Eden')">Eden</button>
+            <button class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg" onclick="showChild('Nathanael')">Nathanaël</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">Ajouter un cadeau</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="giftName" placeholder="Nom du cadeau" class="flex-1 border p-2 rounded">
+                <input type="text" id="giftLink" placeholder="Lien (optionnel)" class="flex-1 border p-2 rounded">
+                <button onclick="addGift()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
+                    Ajouter
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <div class="flex gap-4 justify-center text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 bg-yellow-500 rounded-full"></span>
+                    <span>Réservé</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 bg-green-500 rounded-full"></span>
+                    <span>Acheté</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="Jamie" class="gift-list">
+            <!-- Les cadeaux seront ajoutés ici dynamiquement -->
+        </div>
+        <div id="Eden" class="gift-list hidden">
+            <!-- Les cadeaux seront ajoutés ici dynamiquement -->
+        </div>
+        <div id="Nathanael" class="gift-list hidden">
+            <!-- Les cadeaux seront ajoutés ici dynamiquement -->
+        </div>
+    </div>
+
+    <script>
+        let currentChild = 'Jamie';
+        const defaultGifts = {
+            'Jamie': [
+                { id: 1, name: 'Lego Star Wars - X-wing Fighter', link: 'https://www.lego.com/fr-fr/product/x-wing-starfighter-75355', reserved: false, purchased: false, reservedBy: '' },
+                { id: 2, name: 'Livre Harry Potter - Collection complète', link: 'https://www.fnac.com/coffret-harry-potter', reserved: false, purchased: false, reservedBy: '' },
+                { id: 3, name: 'Nintendo Switch - Mario Kart 8', link: 'https://www.nintendo.fr/mario-kart-8-deluxe', reserved: false, purchased: false, reservedBy: '' },
+                { id: 4, name: 'Nerf Ultra One', link: 'https://www.nerf.com', reserved: false, purchased: false, reservedBy: '' },
+                { id: 5, name: 'Playmobil - Commissariat de police', link: 'https://www.playmobil.fr', reserved: false, purchased: false, reservedBy: '' }
+            ],
+            'Eden': [
+                { id: 6, name: 'Poupée LOL Surprise', link: 'https://www.lolsurprise.com', reserved: false, purchased: false, reservedBy: '' },
+                { id: 7, name: 'Puzzle 3D Ravensburger - Tour Eiffel', link: 'https://www.ravensburger.fr', reserved: false, purchased: false, reservedBy: '' },
+                { id: 8, name: 'Set Créatif - Perles et Bijoux', link: '', reserved: false, purchased: false, reservedBy: '' },
+                { id: 9, name: 'Mini cuisine enfant', link: 'https://www.jouetclub.fr/cuisines-enfants', reserved: false, purchased: false, reservedBy: '' },
+                { id: 10, name: 'Tablette éducative VTech', link: 'https://www.vtech.fr', reserved: false, purchased: false, reservedBy: '' }
+            ],
+            'Nathanael': [
+                { id: 11, name: 'Voiture télécommandée Monster Truck', link: 'https://www.king-jouet.com', reserved: false, purchased: false, reservedBy: '' },
+                { id: 12, name: 'Jeu de construction Magnetic Building Blocks', link: '', reserved: false, purchased: false, reservedBy: '' },
+                { id: 13, name: 'Trottinette 3 roues', link: 'https://www.decathlon.fr', reserved: false, purchased: false, reservedBy: '' },
+                { id: 14, name: 'Déguisement Super-héros', link: '', reserved: false, purchased: false, reservedBy: '' },
+                { id: 15, name: 'Jeu de société Monopoly Junior', link: 'https://www.hasbro.com', reserved: false, purchased: false, reservedBy: '' }
+            ]
+        };
+
+        // Charger ou initialiser les données
+        let gifts = JSON.parse(localStorage.getItem('christmas-gifts')) || defaultGifts;
+
+        function saveGifts() {
+            localStorage.setItem('christmas-gifts', JSON.stringify(gifts));
+            renderGifts();
+        }
+
+        function showChild(childName) {
+            document.querySelectorAll('.gift-list').forEach(list => list.classList.add('hidden'));
+            document.getElementById(childName).classList.remove('hidden');
+            document.querySelectorAll('#childTabs button').forEach(button => {
+                button.classList.remove('active', 'bg-red-700');
+                button.classList.add('bg-red-500');
+            });
+            document.querySelector(`button[onclick="showChild('${childName}')"]`).classList.add('bg-red-700');
+            currentChild = childName;
+        }
+
+        function addGift() {
+            const nameInput = document.getElementById('giftName');
+            const linkInput = document.getElementById('giftLink');
+            const name = nameInput.value.trim();
+            const link = linkInput.value.trim();
+
+            if (name) {
+                const newGift = {
+                    id: Date.now(),
+                    name: name,
+                    link: link,
+                    reserved: false,
+                    purchased: false,
+                    reservedBy: ''
+                };
+                gifts[currentChild].push(newGift);
+                saveGifts();
+                nameInput.value = '';
+                linkInput.value = '';
+            }
+        }
+
+        function toggleReserve(childName, giftId) {
+            const gift = gifts[childName].find(g => g.id === giftId);
+            if (gift.reserved) {
+                gift.reserved = false;
+                gift.purchased = false;
+                gift.reservedBy = '';
+            } else {
+                const name = prompt("Entrez votre nom pour réserver ce cadeau:");
+                if (name) {
+                    gift.reserved = true;
+                    gift.reservedBy = name;
+                }
+            }
+            saveGifts();
+        }
+
+        function togglePurchased(childName, giftId) {
+            const gift = gifts[childName].find(g => g.id === giftId);
+            if (gift.reserved) {
+                gift.purchased = !gift.purchased;
+                saveGifts();
+            } else {
+                alert("Vous devez d'abord réserver le cadeau avant de le marquer comme acheté.");
+            }
+        }
+
+        function deleteGift(childName, giftId) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce cadeau ?")) {
+                gifts[childName] = gifts[childName].filter(gift => gift.id !== giftId);
+                saveGifts();
+            }
+        }
+
+        function renderGifts() {
+            Object.keys(gifts).forEach(childName => {
+                const listElement = document.getElementById(childName);
+                listElement.innerHTML = gifts[childName].map(gift => `
+                    <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col md:flex-row items-center justify-between ${gift.purchased ? 'bg-green-50' : gift.reserved ? 'bg-yellow-50' : ''}">
+                        <div class="flex-1 mb-4 md:mb-0">
+                            <span class="${gift.purchased ? 'line-through text-gray-500' : ''}">${gift.name}</span>
+                            ${gift.link ? `
+                                <a href="${gift.link}" target="_blank" class="ml-2 text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-link"></i>
+                                </a>
+                            ` : ''}
+                            ${gift.reserved ? `
+                                <span class="ml-2 text-sm text-gray-500">(Réservé par ${gift.reservedBy})</span>
+                            ` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="toggleReserve('${childName}', ${gift.id})" 
+                                class="${gift.reserved ? 'bg-yellow-500' : 'bg-blue-500'} text-white px-4 py-2 rounded hover:opacity-90">
+                                ${gift.reserved ? 'Réservé' : 'Réserver'}
+                            </button>
+                            ${gift.reserved ? `
+                                <button onclick="togglePurchased('${childName}', ${gift.id})" 
+                                    class="${gift.purchased ? 'bg-green-500' : 'bg-gray-500'} text-white px-4 py-2 rounded hover:opacity-90">
+                                    ${gift.purchased ? 'Acheté' : 'Marquer comme acheté'}
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteGift('${childName}', ${gift.id})" 
+                                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        // Initialiser l'affichage
+        renderGifts();
+    </script>
+</body>
+</html>
